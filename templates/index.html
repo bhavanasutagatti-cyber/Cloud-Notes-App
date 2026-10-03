@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>CloudNotes | Cloud Dashboard</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        body {
+            background: #f4f7fb;
+            color: #1f2937;
+        }
+
+        .app {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* SIDEBAR */
+
+        .sidebar {
+            width: 240px;
+            background: #111827;
+            color: white;
+            padding: 25px 18px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 40px;
+        }
+
+        .logo-icon {
+            width: 38px;
+            height: 38px;
+            background: #2563eb;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .menu-title {
+            color: #9ca3af;
+            font-size: 12px;
+            text-transform: uppercase;
+            margin: 20px 10px 10px;
+        }
+
+        .menu a {
+            display: block;
+            text-decoration: none;
+            color: #d1d5db;
+            padding: 12px 14px;
+            margin-bottom: 6px;
+            border-radius: 8px;
+            transition: 0.2s;
+        }
+
+        .menu a:hover,
+        .menu a.active {
+            background: #1d4ed8;
+            color: white;
+        }
+
+        .cloud-status {
+            position: absolute;
+            bottom: 25px;
+            left: 18px;
+            right: 18px;
+            padding: 14px;
+            background: #1f2937;
+            border-radius: 10px;
+        }
+
+        .status-dot {
+            display: inline-block;
+            width: 9px;
+            height: 9px;
+            background: #22c55e;
+            border-radius: 50%;
+            margin-right: 7px;
+        }
+
+        .cloud-status small {
+            color: #9ca3af;
+        }
+
+        /* MAIN */
+
+        .main {
+            margin-left: 240px;
+            width: calc(100% - 240px);
+            padding: 30px 40px;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .topbar h1 {
+            font-size: 28px;
+            color: #111827;
+        }
+
+        .topbar p {
+            color: #6b7280;
+            margin-top: 5px;
+        }
+
+        .server-status {
+            background: white;
+            border: 1px solid #e5e7eb;
+            padding: 10px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        .server-status span {
+            color: #16a34a;
+            font-weight: bold;
+        }
+
+        /* STAT CARDS */
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            padding: 22px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+        }
+
+        .stat-card .label {
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .stat-card .value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #111827;
+        }
+
+        .stat-card .icon {
+            float: right;
+            font-size: 25px;
+        }
+
+        /* CONTENT */
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+        .card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .card-header h2 {
+            font-size: 19px;
+            color: #111827;
+        }
+
+        .card-header span {
+            font-size: 13px;
+            color: #6b7280;
+        }
+
+        /* FORM */
+
+        textarea {
+            width: 100%;
+            height: 180px;
+            resize: vertical;
+            border: 1px solid #d1d5db;
+            border-radius: 10px;
+            padding: 15px;
+            font-size: 15px;
+            outline: none;
+        }
+
+        textarea:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .btn {
+            width: 100%;
+            margin-top: 15px;
+            border: none;
+            background: #2563eb;
+            color: white;
+            padding: 13px;
+            border-radius: 9px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn:hover {
+            background: #1d4ed8;
+        }
+
+        /* NOTES */
+
+        .notes-container {
+            max-height: 390px;
+            overflow-y: auto;
+        }
+
+        .note {
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 12px;
+            background: #fafafa;
+        }
+
+        .note-content {
+            color: #374151;
+            line-height: 1.5;
+            margin-bottom: 10px;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .note-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .note-label {
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .delete {
+            color: #dc2626;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .delete:hover {
+            text-decoration: underline;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 50px 20px;
+            color: #9ca3af;
+        }
+
+        .empty-icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+
+        /* CLOUD SERVICES */
+
+        .services {
+            margin-top: 25px;
+        }
+
+        .service-list {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+        }
+
+        .service {
+            background: #f8fafc;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 16px 10px;
+            text-align: center;
+        }
+
+        .service-icon {
+            font-size: 25px;
+            margin-bottom: 8px;
+        }
+
+        .service-name {
+            font-size: 12px;
+            font-weight: bold;
+            color: #374151;
+        }
+
+        .service-status {
+            font-size: 11px;
+            color: #16a34a;
+            margin-top: 4px;
+        }
+
+        /* FOOTER */
+
+        footer {
+            text-align: center;
+            color: #9ca3af;
+            font-size: 13px;
+            margin-top: 35px;
+            padding-bottom: 15px;
+        }
+
+        /* RESPONSIVE */
+
+        @media (max-width: 1000px) {
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .service-list {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 700px) {
+
+            .sidebar {
+                width: 70px;
+                padding: 20px 10px;
+            }
+
+            .logo span,
+            .menu a span,
+            .menu-title,
+            .cloud-status {
+                display: none;
+            }
+
+            .logo {
+                justify-content: center;
+            }
+
+            .menu a {
+                text-align: center;
+                font-size: 18px;
+            }
+
+            .main {
+                margin-left: 70px;
+                width: calc(100% - 70px);
+                padding: 20px;
+            }
+
+            .topbar {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .service-list {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="app">
+
+    <!-- SIDEBAR -->
+
+    <aside class="sidebar">
+
+        <div class="logo">
+            <div class="logo-icon">☁</div>
+            <span>CloudNotes</span>
+        </div>
+
+        <div class="menu-title">Workspace</div>
+
+        <div class="menu">
+
+            <a href="/" class="active">
+                📊 <span>Dashboard</span>
+            </a>
+
+            <a href="/">
+                📝 <span>My Notes</span>
+            </a>
+
+            <a href="/">
+                ☁️ <span>Cloud Storage</span>
+            </a>
+
+            <a href="/">
+                ⚙️ <span>Settings</span>
+            </a>
+
+        </div>
+
+        <div class="cloud-status">
+            <div>
+                <span class="status-dot"></span>
+                <strong>Cloud Online</strong>
+            </div>
+
+            <small>AWS deployment ready</small>
+        </div>
+
+    </aside>
+
+
+    <!-- MAIN CONTENT -->
+
+    <main class="main">
+
+        <div class="topbar">
+
+            <div>
+                <h1>Cloud Notes Dashboard</h1>
+                <p>Manage your notes with cloud-based services.</p>
+            </div>
+
+            <div class="server-status">
+                ● <span>Application Active</span>
+            </div>
+
+        </div>
+
+
+        <!-- STATISTICS -->
+
+        <section class="stats">
+
+            <div class="stat-card">
+                <div class="icon">📝</div>
+                <div class="label">Total Notes</div>
+                <div class="value">{{ notes|length }}</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="icon">☁️</div>
+                <div class="label">Storage</div>
+                <div class="value">Active</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="icon">⚡</div>
+                <div class="label">Cloud Status</div>
+                <div class="value">Online</div>
+            </div>
+
+        </section>
+
+
+        <!-- MAIN CONTENT -->
+
+        <section class="content-grid">
+
+
+            <!-- CREATE NOTE -->
+
+            <div class="card">
+
+                <div class="card-header">
+                    <h2>Create New Note</h2>
+                    <span>Quick Entry</span>
+                </div>
+
+                <form method="POST">
+
+                    <textarea
+                        name="note"
+                        placeholder="Write your note here..."
+                        required></textarea>
+
+                    <button type="submit" class="btn">
+                        + Save Note
+                    </button>
+
+                </form>
+
+            </div>
+
+
+            <!-- RECENT NOTES -->
+
+            <div class="card">
+
+                <div class="card-header">
+
+                    <h2>Recent Notes</h2>
+
+                    <span>{{ notes|length }} notes</span>
+
+                </div>
+
+
+                <div class="notes-container">
+
+                    {% if notes %}
+
+                        {% for note in notes %}
+
+                        <div class="note">
+
+                            <div class="note-content">
+                                {{ note }}
+                            </div>
+
+                            <div class="note-footer">
+
+                                <span class="note-label">
+                                    Cloud Note #{{ loop.index }}
+                                </span>
+
+                                <a
+                                    href="/delete/{{ loop.index0 }}"
+                                    class="delete">
+                                    Delete
+                                </a>
+
+                            </div>
+
+                        </div>
+
+                        {% endfor %}
+
+                    {% else %}
+
+                        <div class="empty">
+
+                            <div class="empty-icon">📝</div>
+
+                            <p>No notes created yet.</p>
+
+                            <small>
+                                Create your first cloud note.
+                            </small>
+
+                        </div>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- CLOUD SERVICES -->
+
+        <section class="card services">
+
+            <div class="card-header">
+
+                <h2>Cloud Services</h2>
+
+                <span>Module 3 Infrastructure</span>
+
+            </div>
+
+
+            <div class="service-list">
+
+                <div class="service">
+
+                    <div class="service-icon">🖥️</div>
+
+                    <div class="service-name">
+                        EC2
+                    </div>
+
+                    <div class="service-status">
+                        Ready
+                    </div>
+
+                </div>
+
+
+                <div class="service">
+
+                    <div class="service-icon">🗄️</div>
+
+                    <div class="service-name">
+                        RDS
+                    </div>
+
+                    <div class="service-status">
+                        Planned
+                    </div>
+
+                </div>
+
+
+                <div class="service">
+
+                    <div class="service-icon">📦</div>
+
+                    <div class="service-name">
+                        S3
+                    </div>
+
+                    <div class="service-status">
+                        Planned
+                    </div>
+
+                </div>
+
+
+                <div class="service">
+
+                    <div class="service-icon">🔐</div>
+
+                    <div class="service-name">
+                        IAM
+                    </div>
+
+                    <div class="service-status">
+                        Planned
+                    </div>
+
+                </div>
+
+
+                <div class="service">
+
+                    <div class="service-icon">📈</div>
+
+                    <div class="service-name">
+                        CloudWatch
+                    </div>
+
+                    <div class="service-status">
+                        Planned
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <footer>
+            CloudNotes • Cloud Services & Web App Deployment
+        </footer>
+
+    </main>
+
+</div>
+
+</body>
+
+</html>Flask
